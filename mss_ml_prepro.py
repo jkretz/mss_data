@@ -36,7 +36,7 @@ for ts in np.arange(dim_t):
     for nl in np.arange(dim_vert):
         p_ml[ts, nl, :, :] = hyam[nl] + p_sfc[ts, :, :] * hybm[nl]
 
-ofile = 'test_ml.nc'
+ofile = str(sys.argv[3])
 f_out = Dataset(ofile, 'w', format='NETCDF4_CLASSIC')
 
 # create dimension
