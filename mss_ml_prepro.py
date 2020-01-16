@@ -28,13 +28,15 @@ hyam, hybm = f_ml.variables['hyam'][:], f_ml.variables['hybm'][:]
 time_ml, lat_ml, lon_ml = f_ml.variables['time'], f_ml.variables['lat'], f_ml.variables['lon']
 
 dim_t, dim_lat, dim_lon = len(time_ml[:]),  len(lat_ml[:]),  len(lon_ml[:])
-dim_vert = len(hyam)
+dim_vert = len(f_ml.variables['lev'][:])
+dim_vert_max = len(hyam)
+dim_vert_delta = dim_vert_max-dim_vert
 
 p_ml = np.zeros((dim_t, dim_vert, dim_lat, dim_lon))
 
 for ts in np.arange(dim_t):
     for nl in np.arange(dim_vert):
-        p_ml[ts, nl, :, :] = hyam[nl] + p_sfc[ts, :, :] * hybm[nl]
+        p_ml[ts, nl, :, :] = hyam[dim_vert_delta+nl] + p_sfc[ts, :, :] * hybm[dim_vert_delta+nl]
 
 ofile = str(sys.argv[3])
 f_out = Dataset(ofile, 'w', format='NETCDF4_CLASSIC')

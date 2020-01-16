@@ -5,7 +5,7 @@ mkdir -p ecmwf_prepro/
 rsync -avhP mistral:/scratch/b/b380425/mss/* ecmwf_input/
 
 ecmwf_inits=(ecmwf_input/*)
-ecmwf_inits_list=(${ecmwf_inits[-1]}) # ${ecmwf_inits[-2]} ${ecmwf_inits[-3]})
+ecmwf_inits_list=(${ecmwf_inits[-1]} ${ecmwf_inits[-2]} ) # ${ecmwf_inits[-3]})
 cdo_anaconda=/home_local/jkretzs/anaconda3/envs/cdo/bin/cdo
 
 for init_dir in ${ecmwf_inits_list[@]}
@@ -17,7 +17,7 @@ do
     $cdo_anaconda -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
     $cdo_anaconda -t ecmwf -f nc copy ${file_str}_ml.grb tmp_ml.nc
     $cdo_anaconda -t ecmwf -f nc copy ${file_str}_pl.grb tmp_pl.nc
-
+   
     # Process the model level data using a python script
     /home_local/jkretzs/anaconda3/envs/cdo/bin/python ../../mss_ml_prepro.py tmp_ml.nc ${file_str}.sfc.nc ${file_str}.ml.nc
     rm tmp_ml.nc
@@ -53,6 +53,6 @@ do
     ncatted -O -a standard_name,D,o,c,"divergence_of_wind" ${file_str}.pl.nc
 
     mv ${file_str}*.nc ../../ecmwf_prepro/
-    cd ..
+    cd ../..
 done
 
