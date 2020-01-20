@@ -1,5 +1,4 @@
 .idea
-ecmwf_input/
-mss_prepro/
-icon_grid/
-icon_input/
+*.grb
+*.nc
+*.grib2
