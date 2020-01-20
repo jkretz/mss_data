@@ -1,7 +1,6 @@
 #!/bin/bash
 
 workdir=`pwd`
-base_dir=
 
 # Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed and are available to MSS
 ini_dir=${work_dir}..
