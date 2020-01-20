@@ -70,7 +70,7 @@ if [ ! -e ${file_str}.sfc.nc ]
 then
     for var in u_10m v_10m clct clcl clcm clch pmsl
     do
-	for step_int in {0..24..3}
+	for step_int in {0..72..3}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -121,7 +121,7 @@ if [ ! -e ${file_str}.ml.nc ]
 then
     for var in p clc t
     do
-	for step_int in {0..24..3}
+	for step_int in {0..72..3}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -136,9 +136,15 @@ then
 	    do
 		file_name=icon_global_icosahedral_model-level_${date}${init_time}_${step}_${lev}_${var^^}.grib2.bz2
 		url_var=${dwd_base_url}/${init_time}/${var}/${file_name}
-		wget -q ${url_var}
-		bzip2 -dq ${file_name}
+		wget -q ${url_var} &
 	    done
+	    wait
+	    for lev in {36..90}
+	    do
+		file_name=icon_global_icosahedral_model-level_${date}${init_time}_${step}_${lev}_${var^^}.grib2.bz2
+		bzip2 -dq ${file_name} &
+	    done
+	    wait
 	done
 	cat *${var^^}.grib2 > ${var}_tmp.grib2
 	cdo -P 2 -f nc remap,${target_grid},${weights_remap} ${var}_tmp.grib2  ${var}_tmp.nc
@@ -161,5 +167,6 @@ then
     mv tmp1_${file_str}.ml.nc ${file_str}.ml.nc
     cp ${file_str}.ml.nc $workdir/../mss_prepro/
 else
+    echo ''
     cp ${file_str}.ml.nc $workdir/../mss_prepro/
 fi
