@@ -3,16 +3,6 @@
 workdir=`pwd`
 base_dir=
 
-# Give path to MSS prepro anaconda bin
-conda_base_path=/home_local/jkretzs/anaconda3
-conda_prepro_instance=cdo
-conda_prepro_bin=${conda_base_path}/envs/${conda_prepro_instance}/bin
-if [[ ${PATH} != *${conda_prepro_bin}* ]]
-then
-    export PATH=${conda_prepro_bin}:${PATH}
-fi
-    
-
 # Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed and are available to MSS
 ini_dir=${work_dir}..
 ecmwf_inits=(${ini_dir}/ecmwf_input/*)
