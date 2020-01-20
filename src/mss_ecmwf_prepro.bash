@@ -13,11 +13,13 @@ then
 fi
     
 
-# Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed
+# Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed and are available to MSS
 ini_dir=${work_dir}..
 ecmwf_inits=(${ini_dir}/ecmwf_input/*)
 ecmwf_inits_list=(${ecmwf_inits[-1]} ${ecmwf_inits[-2]}  ${ecmwf_inits[-3]})
 
+# This is needed for clean-up. The whole clean up section can be done in a more sofisticated way
+mkdir -p  ${workdir}/../mss_prepro/tmp
 
 for init_dir in ${ecmwf_inits_list[@]}
 do
@@ -28,8 +30,10 @@ do
     # Check if preprocessed files allready exit
     if [ -f ${workdir}/../mss_prepro/${file_str}.sfc.nc -a -f ${workdir}/../mss_prepro/${file_str}.ml.nc -a -f ${workdir}/../mss_prepro/${file_str}.ml.nc ]
      then
-     	continue
+     	 cp ${workdir}/../mss_prepro/${file_str}*.nc ${workdir}/../mss_prepro/tmp
+	 continue
     fi
+    
     # Convert grib to netcdf
     cdo  -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
     cdo -t ecmwf -f nc copy ${file_str}_ml.grb tmp_ml.nc
@@ -70,7 +74,11 @@ do
     ncatted -O -a standard_name,D,o,c,"divergence_of_wind" ${file_str}.pl.nc
 
     # Move preprocessed files into mss_prepro directory
-    mv ${file_str}*.nc ${workdir}/../mss_prepro/
+    mv ${file_str}*.nc ${workdir}/../mss_prepro/tmp
 
 done
 
+# Clean-up contiunes
+rm ${workdir}/../mss_prepro/*.nc
+mv  ${workdir}/../mss_prepro/tmp/*.nc ${workdir}/../mss_prepro/
+rm -r ${workdir}/../mss_prepro/tmp
