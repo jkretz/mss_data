@@ -3,9 +3,6 @@
 
 set -x
 
-eval `ssh-agent -s`
-ssh-add /home/ms/datex/gdr/.ssh/id_rsa_mss
-
 hour=$(date +"%k")
 init_time_step=$(((($hour)/6)-2))
 if [ $init_time_step -eq -2 ]
@@ -109,15 +106,16 @@ retrieve,
         levtype  = ml,                                  # model levels,
         levelist = 60/to/137  
 EOF
-#mars mars_sfc &
+mars mars_sfc &
 mars mars_pl &  
-#mars mars_ml &
+mars mars_ml &
 wait
 
-
 # Clean up
- rm mars_sfc mars_pl mars_ml
+rm mars_sfc mars_pl mars_ml
 
 # Copy data to remote site
-rsync -avhP ${ecmwf_input} mss@139.18.173.186:/home/mss/mss_data
-
+eval `ssh-agent -s`
+ssh-add /home/ms/datex/gdr/.ssh/id_rsa_mss
+rsync -avhP ${ecmwf_input}/* mss@139.18.173.186:/home/mss/mss_data/ecmwf_input
+rsync -avhP ${ecmwf_input}/* mss@139.18.173.186:/home/mss/mssdata/ecmwf_input
