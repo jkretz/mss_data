@@ -97,7 +97,7 @@ retrieve,
         time     = ${init_time},
         step     = ${step},
         target   = ${retrieve_str}_ml.grb,
-        param    = t/cc,
+        param    = t/cc/q,
         repres   = sh,                                  # spherical harmonics,
        	area     = ${latlon_area},
   	resol    = 1279,
@@ -118,4 +118,3 @@ rm mars_sfc mars_pl mars_ml
 eval `ssh-agent -s`
 ssh-add /home/ms/datex/gdr/.ssh/id_rsa_mss
 rsync -avhP ${ecmwf_input}/* mss@139.18.173.186:/home/mss/mss_data/ecmwf_input
-rsync -avhP ${ecmwf_input}/* mss@139.18.173.186:/home/mss/mssdata/ecmwf_input
