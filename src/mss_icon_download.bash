@@ -1,17 +1,29 @@
 #!/bin/bash
 
 # This directory should be set to location of this script. Necessary for cronjob
-workdir='/home_local/jkretzs/mss/mss_data/src/'
+workdir='/home/mss/mss_data/src/'
 
+# Give path to MSS prepro anaconda bin
+conda_base_path=/home/mss/miniconda3
+conda_prepro_instance=mss_prepro
+conda_prepro_bin=${conda_base_path}/envs/${conda_prepro_instance}/bin
+if [[ ${PATH} != *${conda_prepro_bin}* ]]
+then
+    export PATH=${conda_prepro_bin}:${PATH}
+fi
+
+# Number of processes used for uncompression *.bz2 files
+nproc=6
 
 # Get some time information 
 hour=$(date +"%k")
-init_time_step=$(((($hour+1)/6)))
 
+# 12 hourly request
+init_time_step=$(((($hour)/6)))
 if [ $init_time_step -eq 0 ]
 then
     date=`date -d "-1 day" '+%Y%m%d'`
-    init_time="18"  
+    init_time="12"
 elif [ $init_time_step -eq 1 ]
 then
     date=`date -u '+%Y%m%d'`
@@ -19,16 +31,13 @@ then
 elif [ $init_time_step -eq 2 ]
 then
     date=`date -u '+%Y%m%d'`
-    init_time="06"
+    init_time="00"
 elif [ $init_time_step -eq 3 ]
 then
     date=`date -u '+%Y%m%d'`
     init_time="12"
-elif [ $init_time_step -eq 4 ]
-then
-    date=`date -u '+%Y%m%d'`
-    init_time="18"
 fi
+
 file_str=icon_${date}_${init_time}
 
 # Create directory where 
@@ -36,15 +45,6 @@ icon_input_day=${workdir}/../icon_input/${file_str}
 if [ ! -d  ${icon_input_day} ]
 then
     mkdir -p ${icon_input_day}
-fi
-
-# Give path to MSS prepro anaconda bin -> this can be removed later because scirpt is called where this is done allready
-conda_base_path=/home_local/jkretzs/anaconda3
-conda_prepro_instance=cdo
-conda_prepro_bin=${conda_base_path}/envs/${conda_prepro_instance}/bin
-if [[ ${PATH} != *${conda_prepro_bin}* ]]
-then
-    export PATH=${conda_prepro_bin}:${PATH}
 fi
 
 # Perpare regridding by creating weights if not allready available
@@ -58,19 +58,16 @@ then
      cdo gennn,${target_grid} ${grid_file_icon} ${weights_remap}
 fi
 
-
 # Download ICON data from https://opendata.dwd.de/
 dwd_base_url=https://opendata.dwd.de/weather/nwp/icon/grib
-nproc=4
 cd ${icon_input_day}
-
 
 # Surface variabels
 if [ ! -e $workdir/../icon_input/${file_str}/${file_str}.sfc.nc ]
 then
     for var in u_10m v_10m clct clcl clcm clch pmsl
     do
-	for step_int in {0..0..0}
+	for step_int in {0..48..3}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -120,7 +117,7 @@ if [ ! -e $workdir/../icon_input/${file_str}/${file_str}.ml.nc ]
 then
     for var in p clc t qv  
     do
-	for step_int in {0..0..0}
+	for step_int in {0..48..3}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then

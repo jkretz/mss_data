@@ -15,8 +15,7 @@ dir=/home_local/jkretzs/mss/mss_data
 src_dir=${dir}/src
 
 cd ${src_dir}
-#./mss_ecmwf_prepro.bash
-./mss_icon_download.bash
+./mss_ecmwf_prepro.bash
 cd ..
 
 
