@@ -61,5 +61,7 @@ t = f_ml.variables['t'][:]
 create_variable_entry(f_out, 'air_temperature', ('time', 'lev', 'lat', 'lon'), t, units='K', standard_name='air_temperature')
 cc = f_ml.variables['cc'][:]
 create_variable_entry(f_out, 'cc', ('time', 'lev', 'lat', 'lon'), cc, units='dimensionless', standard_name='cloud_area_fraction_in_atmosphere_layer')
+q = f_ml.variables['q'][:]
+create_variable_entry(f_out, 'q', ('time', 'lev', 'lat', 'lon'), q, units='kg.kg^-1', standard_name='specific_humidity')
 
 exit()

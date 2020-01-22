@@ -24,7 +24,7 @@ do
     fi
     
     # Convert grib to netcdf
-    cdo  -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
+    cdo -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
     cdo -t ecmwf -f nc copy ${file_str}_ml.grb tmp_ml.nc
     cdo -t ecmwf -f nc copy ${file_str}_pl.grb tmp_pl.nc
 
@@ -68,6 +68,6 @@ do
 done
 
 # Clean-up contiunes
-rm ${workdir}/../mss_prepro/*.nc
-mv  ${workdir}/../mss_prepro/tmp/*.nc ${workdir}/../mss_prepro/
+rm ${workdir}/../mss_prepro/ecmwf*.nc
+mv  ${workdir}/../mss_prepro/tmp/ecmwf*.nc ${workdir}/../mss_prepro/
 rm -r ${workdir}/../mss_prepro/tmp
