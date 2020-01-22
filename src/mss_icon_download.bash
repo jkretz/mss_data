@@ -1,12 +1,10 @@
 #!/bin/bash
 
-workdir=`pwd`
+# This directory should be set to location of this script. Necessary for cronjob
+workdir='/home_local/jkretzs/mss/mss_data/src/'
 
-#
-end_step=72
-step_size=3
 
-# Get some time information
+# Get some time information 
 hour=$(date +"%k")
 init_time_step=$(((($hour+1)/6)))
 
@@ -33,10 +31,11 @@ then
 fi
 file_str=icon_${date}_${init_time}
 
+# Create directory where 
 icon_input_day=${workdir}/../icon_input/${file_str}
 if [ ! -d  ${icon_input_day} ]
 then
-    mkdir -r ${icon_input_day}
+    mkdir -p ${icon_input_day}
 fi
 
 # Give path to MSS prepro anaconda bin -> this can be removed later because scirpt is called where this is done allready
@@ -62,15 +61,16 @@ fi
 
 # Download ICON data from https://opendata.dwd.de/
 dwd_base_url=https://opendata.dwd.de/weather/nwp/icon/grib
+nproc=4
 cd ${icon_input_day}
 
 
 # Surface variabels
-if [ ! -e ${file_str}.sfc.nc ]
+if [ ! -e $workdir/../icon_input/${file_str}/${file_str}.sfc.nc ]
 then
     for var in u_10m v_10m clct clcl clcm clch pmsl
     do
-	for step_int in {0..72..3}
+	for step_int in {0..0..0}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -83,9 +83,10 @@ then
 	    fi
 	    file_name=icon_global_icosahedral_single-level_${date}${init_time}_${step}_${var^^}.grib2.bz2
 	    url_var=${dwd_base_url}/${init_time}/${var}/${file_name}
-	    wget -q ${url_var}
-	    bzip2 -dq ${file_name}
+	    wget -q ${url_var}&
 	done
+	wait
+	find -name "*.bz2" -print0 | xargs -0 -n1 -P${nproc} bzip2 -d
 	cat *${var^^}.grib2 > ${var}_tmp.grib2
 	cdo -P 2 -f nc remap,${target_grid},${weights_remap} ${var}_tmp.grib2  ${var}_tmp.nc
 	# get rid of pressure dimension for leveled data
@@ -112,16 +113,14 @@ then
     ncatted -O -a standard_name,CLCH,o,c,"high_cloud_area_fraction" ${file_str}.sfc.nc
     ncatted -O -a standard_name,10u,o,c,"surface_eastward_wind" ${file_str}.sfc.nc
     ncatted -O -a standard_name,10v,o,c,"surface_northward_wind" ${file_str}.sfc.nc
-    cp ${file_str}.sfc.nc $workdir/../mss_prepro/
-else
-    cp ${file_str}.sfc.nc $workdir/../mss_prepro/ 
 fi
 
-if [ ! -e ${file_str}.ml.nc ]
+
+if [ ! -e $workdir/../icon_input/${file_str}/${file_str}.ml.nc ]
 then
-    for var in p clc t
+    for var in p clc t qv  
     do
-	for step_int in {0..72..3}
+	for step_int in {0..0..0}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -139,12 +138,7 @@ then
 		wget -q ${url_var} &
 	    done
 	    wait
-	    for lev in {36..90}
-	    do
-		file_name=icon_global_icosahedral_model-level_${date}${init_time}_${step}_${lev}_${var^^}.grib2.bz2
-		bzip2 -dq ${file_name} &
-	    done
-	    wait
+          find -name "*.bz2" -print0 | xargs -0 -n1 -P${nproc} bzip2 -d
 	done
 	cat *${var^^}.grib2 > ${var}_tmp.grib2
 	cdo -P 2 -f nc remap,${target_grid},${weights_remap} ${var}_tmp.grib2  ${var}_tmp.nc
@@ -165,8 +159,17 @@ then
     # remove not needed dimension
     ncwa -a bnds ${file_str}.ml.nc tmp1_${file_str}.ml.nc
     mv tmp1_${file_str}.ml.nc ${file_str}.ml.nc
-    cp ${file_str}.ml.nc $workdir/../mss_prepro/
-else
-    echo ''
-    cp ${file_str}.ml.nc $workdir/../mss_prepro/
 fi
+
+
+# Only copy last 3 initialization times
+rm $workdir/../mss_prepro/icon*.nc
+icon_inits=($workdir/../icon_input/*)
+icon_inits_list=(${icon_inits[-1]} ${icon_inits[-2]}  ${icon_inits[-3]})
+for init_dir in ${icon_inits_list[@]}
+do
+    if [ -f ${init_dir}/*.sfc.nc -a  ${init_dir}/*.ml.nc ]
+    then
+	cp ${init_dir}/*.nc $workdir/../mss_prepro
+    fi
+done
