@@ -27,8 +27,8 @@ step='0/3/6/9/12/15/18/21/24/27/30/33/36/39/42/45/48/51/54/57/60/63/66/69/72'
 ecmwf_input=/scratch/ms/datex/gdr/mss/mss_data/ecmwf_input
 cd ${ecmwf_input}
 
-mkdir -p ${retrieve_str}
-cd ${retrieve_str}
+mkdir -p ${retrieve_str}/tmp
+cd ${retrieve_str}/tmp
 
 if [ -f mars_sfc ]; then
     rm mars_sfc
@@ -111,10 +111,6 @@ mars mars_pl &
 mars mars_ml &
 wait
 
-# Clean up
-rm mars_sfc mars_pl mars_ml
-
-# Copy data to remote site
-eval `ssh-agent -s`
-ssh-add /home/ms/datex/gdr/.ssh/id_rsa_mss
-rsync -avhP ${ecmwf_input}/* mss@139.18.173.186:/home/mss/mss_data/ecmwf_input
+mv ${ecmwf_input}/${retrieve_str}/tmp/*.grb ${ecmwf_input}/${retrieve_str}/
+#Clean-up
+rm -r ${ecmwf_input}/${retrieve_str}/tmp
