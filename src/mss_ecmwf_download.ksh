@@ -20,8 +20,8 @@ then
 fi
 retrieve_str='ecmwf_'${date}'_'${init_time}
 
-latlon_area='40/-80/-10/-20'
-grid='160'
+latlon_area='90/-90/45/90'
+grid='320'
 step='0/3/6/9/12/15/18/21/24/27/30/33/36/39/42/45/48/51/54/57/60/63/66/69/72'
 
 ecmwf_input=/scratch/ms/datex/gdr/mss/mss_data/ecmwf_input
