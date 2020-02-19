@@ -1,0 +1,10 @@
+*/10 19-21 * * * /bin/bash /home/mss/mss_data/mss_prepro_data.bash
+*/10 7-9 * * * /bin/bash /home/mss/mss_data/mss_prepro_data.bash
+#0 7,19 * * * /bin/bash /home/mss/mss_data/src/mss_icon_download.bash
+# For example, you can run a backup of all your user accounts
+# at 5 a.m every week with:
+# 0 5 * * 1 tar -zcf /var/backups/home.tgz /home/
+# 
+# For more information see the manual pages of crontab(5) and cron(8)
+# 
+# m h  dom mon dow   command
