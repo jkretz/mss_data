@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # This directory should be set to location of this script. Necessary for cronjob
 workdir='/home/mss/mss_data/src/'
 
@@ -50,12 +52,12 @@ fi
 # Perpare regridding by creating weights if not allready available
 grid_dir=${workdir}/../icon_grid
 grid_file_icon=${grid_dir}/icon_grid_0026_R03B07_G.nc
-target_grid=${grid_dir}/target_grid_eureca_025.txt
-weights_remap=${grid_dir}/weights_target_grid_eureca_025.nc
+target_grid=${grid_dir}/target_grid_svalbard_025.txt
+weights_remap=${grid_dir}/weights_target_grid_svalbard_025.nc
 
 if [ ! -f ${weights_remap} ]
 then
-     cdo gennn,${target_grid} ${grid_file_icon} ${weights_remap}
+     cdo gendis,${target_grid} ${grid_file_icon} ${weights_remap}
 fi
 
 # Download ICON data from https://opendata.dwd.de/
@@ -67,7 +69,7 @@ if [ ! -e $workdir/../icon_input/${file_str}/${file_str}.sfc.nc ]
 then
     for var in u_10m v_10m clct clcl clcm clch pmsl
     do
-	for step_int in {0..48..3}
+	for step_int in {0..72..3}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -117,7 +119,7 @@ if [ ! -e $workdir/../icon_input/${file_str}/${file_str}.ml.nc ]
 then
     for var in p clc t qv  
     do
-	for step_int in {0..48..3}
+	for step_int in {0..72..3}
 	do
 	    if [ ${step_int} -lt 10 ]
 	    then
@@ -167,6 +169,6 @@ for init_dir in ${icon_inits_list[@]}
 do
     if [ -f ${init_dir}/*.sfc.nc -a  ${init_dir}/*.ml.nc ]
     then
-	cp ${init_dir}/*.nc $workdir/../mss_prepro
+	ln -s ${init_dir}/*.nc $workdir/../mss_prepro
     fi
 done

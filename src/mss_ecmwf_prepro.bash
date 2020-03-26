@@ -14,12 +14,12 @@ for init_dir in ${ecmwf_inits_list[@]}
 do
 
     cd ${workdir}/${init_dir}
-    file_str="$(echo $init_dir | cut -d'/' -f3)"
 
+    file_str="$(echo $init_dir | cut -d'/' -f3)"
     # Check if preprocessed files allready exit
     if [ -f ${workdir}/../mss_prepro/${file_str}.sfc.nc -a -f ${workdir}/../mss_prepro/${file_str}.ml.nc -a -f ${workdir}/../mss_prepro/${file_str}.ml.nc ]
      then
-     	 cp ${workdir}/../mss_prepro/${file_str}*.nc ${workdir}/../mss_prepro/tmp
+     	 mv ${workdir}/../mss_prepro/${file_str}*.nc ${workdir}/../mss_prepro/tmp
 	 continue
     fi
     
