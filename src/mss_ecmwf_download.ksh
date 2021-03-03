@@ -38,8 +38,8 @@ retrieve,
         padding  = 0,
         accuracy = 16,
         class    = od, 
-	expver   = 1, 
-	stream   = oper,
+        expver   = 1,
+        stream   = oper,
         domain   = g,
         type     = fc,
         date     = ${date},
@@ -48,8 +48,8 @@ retrieve,
         target   = ${retrieve_str}_sfc.grb,
         param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp,
         repres   = sh,
-     	area     = ${latlon_area},
-	resol    = 1279,
+        area     = ${latlon_area},
+        resol    = 1279,
         grid     = ${grid},
         gaussian = regular,
         levtype  = sfc
@@ -106,11 +106,43 @@ retrieve,
         levtype  = ml,                                  # model levels,
         levelist = 60/to/137  
 EOF
+
 mars mars_sfc &
 mars mars_pl &  
 mars mars_ml &
 wait
-
 mv ${ecmwf_input}/${retrieve_str}/tmp/*.grb ${ecmwf_input}/${retrieve_str}/
+
+
+if [ -f mars_lagranto ]; then
+    rm mars_lagranto
+fi
+cat <<EOF  > mars_lagranto
+retrieve,
+        padding  = 0,
+        accuracy = 16,
+        class    = od,
+        expver   = 1,
+        stream   = oper,
+        domain   = g,
+        type     = fc,
+        date     = ${date},
+        time     = ${init_time},
+        step     = ${step},
+        target   = ${retrieve_str}_lagaranto.grb,
+        param    = u/v/w,
+        repres   = sh,                                  # spherical harmonics,
+        area     = ${latlon_area},
+        resol    = 1279,
+        grid     = ${grid},
+        gaussian = regular,
+        levtype  = ml,                                  # model levels,
+        levelist = 60/to/137
+EOF
+mars mars_lagranto &
+wait
+mv ${ecmwf_input}/${retrieve_str}/tmp/*.grb ${ecmwf_input}/${retrieve_str}/
+
+wait
 #Clean-up
 rm -r ${ecmwf_input}/${retrieve_str}/tmp

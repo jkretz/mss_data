@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+
 workdir=`pwd`
 
 # Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed and are available to MSS
@@ -14,19 +14,19 @@ for init_dir in ${ecmwf_inits_list[@]}
 do
 
     cd ${workdir}/${init_dir}
-
     file_str="$(echo $init_dir | cut -d'/' -f3)"
+
     # Check if preprocessed files allready exit
     if [ -f ${workdir}/../mss_prepro/${file_str}.sfc.nc -a -f ${workdir}/../mss_prepro/${file_str}.ml.nc -a -f ${workdir}/../mss_prepro/${file_str}.ml.nc ]
      then
-     	 mv ${workdir}/../mss_prepro/${file_str}*.nc ${workdir}/../mss_prepro/tmp
+     	 cp ${workdir}/../mss_prepro/${file_str}*.nc ${workdir}/../mss_prepro/tmp
 	 continue
-    else
+    fi
     
     # Convert grib to netcdf
-    cdo -P 4 -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
-    cdo -P 4 -t ecmwf -f nc copy ${file_str}_ml.grb tmp_ml.nc
-    cdo -P 4 -t ecmwf -f nc copy ${file_str}_pl.grb tmp_pl.nc
+    cdo -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
+    cdo -t ecmwf -f nc copy ${file_str}_ml.grb tmp_ml.nc
+    cdo -t ecmwf -f nc copy ${file_str}_pl.grb tmp_pl.nc
 
     # Process the model level data using a python script
     python ${workdir}/mss_ml_prepro.py tmp_ml.nc ${file_str}.sfc.nc ${file_str}.ml.nc
@@ -62,11 +62,9 @@ do
     ncatted -O -a standard_name,T,o,c,"air_temperature" ${file_str}.pl.nc
     ncatted -O -a standard_name,D,o,c,"divergence_of_wind" ${file_str}.pl.nc
 
-    Move preprocessed files into mss_prepro directory
+    # Move preprocessed files into mss_prepro directory
     mv ${file_str}*.nc ${workdir}/../mss_prepro/tmp
 
-    fi
-    
 done
 
 # Clean-up contiunes
