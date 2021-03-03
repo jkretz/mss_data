@@ -15,7 +15,7 @@ then
 fi
 
 # Number of processes used for uncompression *.bz2 files
-nproc=6
+nproc=4
 
 # Get some time information 
 hour=$(date +"%k")

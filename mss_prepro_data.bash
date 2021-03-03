@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 
 # Give path to MSS prepro anaconda bin
 conda_base_path=/home/mss/miniconda3
@@ -12,11 +12,15 @@ fi
 
 dir=/home/mss/mss_data
 src_dir=${dir}/src
+prepro_tmp_dir=${dir}/mss_prepro/tmp
 
-cd ${src_dir}
-./mss_ecmwf_prepro.bash
-cd ..
-
+# Check if preprocessing has allready started
+if [ ! -d ${prepro_tmp_dir} ]
+then
+    cd ${src_dir}
+    ./mss_ecmwf_prepro.bash >> /home/mss/mss_data/prepro.log
+    cd ..
+fi
 
 
 
