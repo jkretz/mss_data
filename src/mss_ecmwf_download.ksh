@@ -46,7 +46,7 @@ retrieve,
         time     = ${init_time},
         step     = ${step},
         target   = ${retrieve_str}_sfc.grb,
-        param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp,
+        param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp/2t/tcwv/162071/162072,
         repres   = sh,
         area     = ${latlon_area},
         resol    = 1279,
@@ -142,7 +142,7 @@ EOF
 mars mars_lagranto &
 wait
 mv ${ecmwf_input}/${retrieve_str}/tmp/*.grb ${ecmwf_input}/${retrieve_str}/
-
 wait
+
 #Clean-up
 rm -r ${ecmwf_input}/${retrieve_str}/tmp
