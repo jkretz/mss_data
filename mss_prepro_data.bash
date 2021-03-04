@@ -18,7 +18,7 @@ prepro_tmp_dir=${dir}/mss_prepro/tmp
 if [ ! -d ${prepro_tmp_dir} ]
 then
     cd ${src_dir}
-    ./mss_ecmwf_prepro.bash >> /home/mss/mss_data/prepro.log
+    ./mss_ecmwf_prepro.bash
     cd ..
 fi
 

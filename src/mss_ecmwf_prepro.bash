@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 workdir=`pwd`
 
 # Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed and are available to MSS
@@ -24,7 +26,9 @@ do
     fi
     
     # Convert grib to netcdf
-    cdo -t ecmwf -f nc copy ${file_str}_sfc.grb ${file_str}.sfc.nc
+    grib_set -s editionNumber=1 ${file_str}_sfc.grb tmp.grb
+    cdo -t ecmwf -f nc copy tmp.grb ${file_str}.sfc.nc
+    rm tmp.grb
     cdo -t ecmwf -f nc copy ${file_str}_ml.grb tmp_ml.nc
     cdo -t ecmwf -f nc copy ${file_str}_pl.grb tmp_pl.nc
 
