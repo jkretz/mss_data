@@ -49,6 +49,11 @@ do
     ncatted -O -a standard_name,U10M,o,c,"surface_eastward_wind" ${file_str}.sfc.nc
     ncatted -O -a standard_name,V10M,o,c,"surface_northward_wind" ${file_str}.sfc.nc
     ncatted -O -a standard_name,CI,o,c,"sea_ice_area_fraction" ${file_str}.sfc.nc
+    ncatted -O -a standard_name,TCWV,o,c,"ecmwf_iwv" ${file_str}.sfc.nc
+    ncatted -O -a standard_name,var71,o,c,"ecmwf_viwve" ${file_str}.sfc.nc
+    ncatted -O -a standard_name,var72,o,c,"ecmwf_viwvn" ${file_str}.sfc.nc
+    ncatted -O -a units,var71,c,c,"kg m**-1 s**-1" ${file_str}.sfc.nc
+    ncatted -O -a units,var72,c,c,"kg m**-1 s**-1" ${file_str}.sfc.nc
     ncatted -O -a units,CI,c,c,"dimensionless" ${file_str}.sfc.nc
 
     # Process data at pressure level
