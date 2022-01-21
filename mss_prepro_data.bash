@@ -10,17 +10,5 @@ then
     export PATH=${conda_prepro_bin}:${PATH}
 fi
 
-dir=/home/mss/mss_data
-src_dir=${dir}/src
-prepro_tmp_dir=${dir}/mss_prepro/tmp
-
-# Check if preprocessing has allready started
-if [ ! -d ${prepro_tmp_dir} ]
-then
-    cd ${src_dir}
-    ./mss_ecmwf_prepro.bash
-    cd ..
-fi
-
-
+/home/mss/mss_data/src/mss_ecmwf_prepro_new.bash
 
