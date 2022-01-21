@@ -3,7 +3,7 @@ MAILTO=""
 SHELL=/bin/bash
 # PATH variable for cron
 PATH=/usr/local/bin:/usr/local/sbin:/sbin:/usr/sbin:/bin:/usr/bin:/usr/bin/X11
-27 6,18 * * * /usr/local/apps/slurm/18.08.6/bin/sbatch /scratch/ms/datex/gdr/mss/mss_data/src/mss_ecmwf_download.ksh
 */5 7-9 * * * /bin/bash /scratch/ms/datex/gdr/mss/mss_data/src/mss_ecmwf_rsync.bash 
 */5 19-21 * * * /bin/bash /scratch/ms/datex/gdr/mss/mss_data/src/mss_ecmwf_rsync.bash
+0 7,19 * * * /bin/bash /scratch/ms/datex/gdr/mss/mss_data/src/mss_ecmwf_download.ksh
 #######

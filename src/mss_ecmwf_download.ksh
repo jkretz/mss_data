@@ -1,7 +1,9 @@
-#!/bin/ksh
-#SBATCH --chdir=/scratch/ms/datex/gdr/mss/mss_data
+#!/bin/bash
+#SBATCH --chdir=/scratch/ms/datex/gdr/mss/mss_data/ecmwf_input
 
-set -x
+sbatch_command=/usr/local/apps/slurm/18.08.6/bin/sbatch
+
+#set -x
 
 hour=$(date +"%k")
 init_time_step=$(((($hour)/6)-2))
@@ -20,20 +22,31 @@ then
 fi
 retrieve_str='ecmwf_'${date}'_'${init_time}
 
+# Area to be retrieved
 latlon_area='90/-90/45/90'
+latlon_area_lagranto='90/-180/45/180'
+# Grid to which should be interpolated
 grid='320'
-step='0/3/6/9/12/15/18/21/24/27/30/33/36/39/42/45/48/51/54/57/60/63/66/69/72'
+# Number of days. Last timestep to be retrieved is (nday*24)+23
+nday=3
+# Frequency of timestep
+freq=1
 
 ecmwf_input=/scratch/ms/datex/gdr/mss/mss_data/ecmwf_input
-cd ${ecmwf_input}
 
-mkdir -p ${retrieve_str}/tmp
-cd ${retrieve_str}/tmp
+mkdir -p ${ecmwf_input}/${retrieve_str}
+rm -r ${ecmwf_input}/tmp
+mkdir -p ${ecmwf_input}/tmp
 
-if [ -f mars_sfc ]; then
-    rm mars_sfc
-fi
-cat <<EOF > mars_sfc
+ 
+cd ${ecmwf_input}/tmp
+
+for day in $(seq 0 ${nday})  
+do
+    let start=24*${day}
+    let end=${start}+23
+
+    cat <<EOF > mars_sfc_${day}
 retrieve,
         padding  = 0,
         accuracy = 16,
@@ -44,8 +57,8 @@ retrieve,
         type     = fc,
         date     = ${date},
         time     = ${init_time},
-        step     = ${step},
-        target   = ${retrieve_str}_sfc.grb,
+        step     = ${start}/to/${end}/by/${freq},
+        target   = ${retrieve_str}_${day}_1_sfc.grb,
         param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp/2t/tcwv/162071/162072/sf/tp/skt,
         repres   = sh,
         area     = ${latlon_area},
@@ -55,10 +68,18 @@ retrieve,
         levtype  = sfc
 EOF
 
-if [ -f mars_pl ]; then
-    rm mars_pl
-fi
-cat <<EOF > mars_pl
+    cat <<EOF > mars_sfc_${day}.bash
+#!/bin/bash
+
+mars mars_sfc_${day}
+wait
+mv ${retrieve_str}_${day}_1_sfc.grb ${ecmwf_input}/${retrieve_str}
+EOF
+
+    chmod 755 mars_sfc_${day}.bash
+    ${sbatch_command} --job-name=mars_sfc --time=00:30:00 ./mars_sfc_${day}.bash
+
+    cat <<EOF > mars_pl_${day}
 retrieve,
 	padding  = 0,
 	accuracy = 16,
@@ -69,11 +90,11 @@ retrieve,
         type     = fc,
         date     = ${date},
         time     = ${init_time},
-        step     = ${step},
-        target   = ${retrieve_str}_pl.grb,
+        step     = ${start}/to/${end}/by/${freq},
+        target   = ${retrieve_str}_${day}_2_pl.grb,
         param    = u/v/d/t/z/q,
         repres   = sh,                                  # spherical harmonics,
-       	area     = ${latlon_area},
+       	area     = ${latlon_area_lagranto},
   	resol    = 1279,
         grid     = ${grid},
         gaussian = regular,
@@ -81,10 +102,18 @@ retrieve,
         levelist = 925/850/700/500/400/300/250/200/150/100
 EOF
 
-if [ -f mars_ml ]; then
-    rm mars_ml
-fi
-cat <<EOF  > mars_ml
+    cat <<EOF > mars_pl_${day}.bash
+#!/bin/bash
+
+mars mars_pl_${day}
+wait
+mv ${retrieve_str}_${day}_2_pl.grb ${ecmwf_input}/${retrieve_str}
+EOF
+
+    chmod 755 mars_pl_${day}.bash
+    ${sbatch_command} --job-name=mars_pl --time=01:00:00 ./mars_pl_${day}.bash
+
+    cat <<EOF > mars_ml_${day}
 retrieve,
 	padding  = 0,
 	accuracy = 16,
@@ -95,8 +124,8 @@ retrieve,
         type     = fc,
         date     = ${date},
         time     = ${init_time},
-        step     = ${step},
-        target   = ${retrieve_str}_ml.grb,
+        step     = ${start}/to/${end}/by/${freq},
+        target   = ${retrieve_str}_${day}_3_ml.grb,
         param    = t/cc/q,
         repres   = sh,                                  # spherical harmonics,
        	area     = ${latlon_area},
@@ -107,17 +136,19 @@ retrieve,
         levelist = 60/to/137  
 EOF
 
-mars mars_sfc &
-mars mars_pl &  
-mars mars_ml &
+    cat <<EOF > mars_ml_${day}.bash
+#!/bin/bash
+
+mars mars_ml_${day}
 wait
-mv ${ecmwf_input}/${retrieve_str}/tmp/*.grb ${ecmwf_input}/${retrieve_str}/
+mv ${retrieve_str}_${day}_3_ml.grb ${ecmwf_input}/${retrieve_str}
+EOF
+
+    chmod 755 mars_ml_${day}.bash
+    ${sbatch_command} --job-name=mars_ml --time=01:30:00 ./mars_ml_${day}.bash
 
 
-if [ -f mars_lagranto ]; then
-    rm mars_lagranto
-fi
-cat <<EOF  > mars_lagranto
+cat <<EOF  > mars_lagranto_${day}
 retrieve,
         padding  = 0,
         accuracy = 16,
@@ -128,21 +159,64 @@ retrieve,
         type     = fc,
         date     = ${date},
         time     = ${init_time},
-        step     = ${step},
-        target   = ${retrieve_str}_lagaranto.grb,
+	step     = ${start}/to/${end}/by/${freq},	
+        target   = ${retrieve_str}_${day}_4_lagaranto.grb,
         param    = u/v/w,
         repres   = sh,                                  # spherical harmonics,
-        area     = ${latlon_area},
+        area     = ${latlon_area_lagranto},
         resol    = 1279,
         grid     = ${grid},
         gaussian = regular,
         levtype  = ml,                                  # model levels,
         levelist = 60/to/137
 EOF
-mars mars_lagranto &
-wait
-mv ${ecmwf_input}/${retrieve_str}/tmp/*.grb ${ecmwf_input}/${retrieve_str}/
-wait
 
-#Clean-up
-rm -r ${ecmwf_input}/${retrieve_str}/tmp
+cat <<EOF > mars_lagranto_${day}.bash
+#!/bin/bash
+
+mars mars_lagranto_${day}
+wait
+mv ${retrieve_str}_${day}_4_lagaranto.grb ${ecmwf_input}/${retrieve_str}
+EOF
+
+chmod 755 mars_lagranto_${day}.bash
+
+${sbatch_command} --job-name=mars_lagranto --time=01:30:00 ./mars_lagranto_${day}.bash
+
+
+    cat <<EOF > mars_sfclagranto_${day}
+retrieve,
+        padding  = 0,
+        accuracy = 16,
+        class    = od, 
+        expver   = 1,
+        stream   = oper,
+        domain   = g,
+        type     = fc,
+        date     = ${date},
+        time     = ${init_time},
+        step     = ${start}/to/${end}/by/${freq},
+        target   = ${retrieve_str}_${day}_1_sfclagranto.grb,
+        param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp/2t/tcwv/162071/162072/sf/tp/skt,
+        repres   = sh,
+        area     = ${latlon_area_lagranto},
+        resol    = 1279,
+        grid     = ${grid},
+        gaussian = regular,
+        levtype  = sfc
+EOF
+
+    cat <<EOF > mars_sfclagranto_${day}.bash
+#!/bin/bash
+
+mars mars_sfclagranto_${day}
+wait
+mv ${retrieve_str}_${day}_1_sfclagranto.grb ${ecmwf_input}/${retrieve_str}
+EOF
+
+    chmod 755 mars_sfclagranto_${day}.bash
+    ${sbatch_command} --job-name=mars_sfclagranto --time=00:30:00 ./mars_sfclagranto_${day}.bash
+
+
+
+done
