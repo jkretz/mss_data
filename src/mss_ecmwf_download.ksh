@@ -30,7 +30,7 @@ grid='320'
 # Number of days. Last timestep to be retrieved is (nday*24)+23
 nday=3
 # Frequency of timestep
-freq=1
+freq=2
 
 ecmwf_input=/scratch/ms/datex/gdr/mss/mss_data/ecmwf_input
 
@@ -44,7 +44,11 @@ cd ${ecmwf_input}/tmp
 for day in $(seq 0 ${nday})  
 do
     let start=24*${day}
-    let end=${start}+23
+    if [[ $day < 3 ]]; then
+	let end=${start}+23
+    else
+	end=90
+    fi
 
     cat <<EOF > mars_sfc_${day}
 retrieve,
@@ -59,7 +63,7 @@ retrieve,
         time     = ${init_time},
         step     = ${start}/to/${end}/by/${freq},
         target   = ${retrieve_str}_${day}_1_sfc.grb,
-        param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp/2t/tcwv/162071/162072/sf/tp/skt,
+        param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp/2t/tcwv/162071/162072/sf/tp/skt/3059/260048/3064/172144/260010,
         repres   = sh,
         area     = ${latlon_area},
         resol    = 1279,
@@ -77,7 +81,7 @@ mv ${retrieve_str}_${day}_1_sfc.grb ${ecmwf_input}/${retrieve_str}
 EOF
 
     chmod 755 mars_sfc_${day}.bash
-    ${sbatch_command} --job-name=mars_sfc --time=00:30:00 ./mars_sfc_${day}.bash
+    ${sbatch_command} --job-name=mars_sfc --time=00:45:00 ./mars_sfc_${day}.bash
 
     cat <<EOF > mars_pl_${day}
 retrieve,
@@ -94,7 +98,7 @@ retrieve,
         target   = ${retrieve_str}_${day}_2_pl.grb,
         param    = u/v/d/t/z/q,
         repres   = sh,                                  # spherical harmonics,
-       	area     = ${latlon_area_lagranto},
+       	area     = ${latlon_area},
   	resol    = 1279,
         grid     = ${grid},
         gaussian = regular,
@@ -147,6 +151,19 @@ EOF
     chmod 755 mars_ml_${day}.bash
     ${sbatch_command} --job-name=mars_ml --time=01:30:00 ./mars_ml_${day}.bash
 
+done
+
+
+for day in $(seq 0 ${nday})
+do
+    let start=24*${day}
+    if [[ $day < 3 ]]; then
+        let end=${start}+23
+    else
+        end=90
+    fi
+
+
 
 cat <<EOF  > mars_lagranto_${day}
 retrieve,
@@ -159,7 +176,7 @@ retrieve,
         type     = fc,
         date     = ${date},
         time     = ${init_time},
-	step     = ${start}/to/${end}/by/${freq},	
+	step     = ${start}/to/${end}/by/1,	
         target   = ${retrieve_str}_${day}_4_lagaranto.grb,
         param    = u/v/w,
         repres   = sh,                                  # spherical harmonics,
@@ -195,7 +212,7 @@ retrieve,
         type     = fc,
         date     = ${date},
         time     = ${init_time},
-        step     = ${start}/to/${end}/by/${freq},
+        step     = ${start}/to/${end}/by/1,
         target   = ${retrieve_str}_${day}_1_sfclagranto.grb,
         param    = msl/lcc/mcc/hcc/10u/10v/ci/tcc/sp/2t/tcwv/162071/162072/sf/tp/skt,
         repres   = sh,
@@ -215,7 +232,7 @@ mv ${retrieve_str}_${day}_1_sfclagranto.grb ${ecmwf_input}/${retrieve_str}
 EOF
 
     chmod 755 mars_sfclagranto_${day}.bash
-    ${sbatch_command} --job-name=mars_sfclagranto --time=00:30:00 ./mars_sfclagranto_${day}.bash
+    ${sbatch_command} --job-name=mars_sfclagranto --time=00:45:00 ./mars_sfclagranto_${day}.bash
 
 
 
