@@ -10,5 +10,9 @@ then
     export PATH=${conda_prepro_bin}:${PATH}
 fi
 
-/home/mss/mss_data/src/mss_ecmwf_prepro_new.bash
+
+/home/mss/mss_data/src/mss_ecmwf_prepro.bash
+
+# old naming
+#/home/mss/mss_data/src/mss_ecmwf_prepro_new.bash
 

@@ -52,8 +52,8 @@ fi
 # Perpare regridding by creating weights if not allready available
 grid_dir=${workdir}/../icon_grid
 grid_file_icon=${grid_dir}/icon_grid_0026_R03B07_G.nc
-target_grid=${grid_dir}/target_grid_arcsix_025.txt
-weights_remap=${grid_dir}/weights_target_grid_arcsix_025.nc
+target_grid=${grid_dir}/target_grid_svalbard_025.txt
+weights_remap=${grid_dir}/weights_target_grid_svalbard_025.nc
 
 if [ ! -f ${weights_remap} ]
 then

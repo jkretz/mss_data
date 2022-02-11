@@ -31,6 +31,9 @@ prepro_sfc () {
 	ncatted -O -a standard_name,TCWV,o,c,"ecmwf_iwv" ${ofile}
 	ncatted -O -a standard_name,var71,o,c,"ecmwf_viwve" ${ofile}
 	ncatted -O -a standard_name,var72,o,c,"ecmwf_viwvn" ${ofile}
+	ncatted -O -a standard_name,SKT,o,c,"skin_temperature" ${ofile}
+	ncatted -O -a standard_name,TP,o,c,"precip_total" ${ofile}
+	ncatted -O -a standard_name,SF,o,c,"precip_snow" ${ofile}
 	ncatted -O -a units,var71,c,c,"kg m**-1 s**-1" ${ofile}
 	ncatted -O -a units,var72,c,c,"kg m**-1 s**-1" ${ofile}
 	ncatted -O -a units,CI,c,c,"dimensionless" ${ofile}
@@ -60,8 +63,8 @@ prepro_pl () {
 	ncatted -O -a standard_name,ZH,o,c,"geopotential_height" ${ofile}
 	ncatted -O -a units,ZH,c,c,"m" ${ofile}
 	ncatted -O -a standard_name,plev,o,c,"atmosphere_pressure_coordinate" ${ofile}
-	ncatted -O -a positive,plev,o,c,"down" ${ofile}
-	ncatted -O -a units,plev,c,c,"hPa" ${ofile}   
+	ncatted -O -a positive,plev,c,c,"down" ${ofile}
+	ncatted -O -a units,plev,o,c,"hPa" ${ofile}   #orig: units,plev,c,c
 	ncatted -O -a standard_name,U,o,c,"eastward_wind" ${ofile}
 	ncatted -O -a standard_name,V,o,c,"northward_wind" ${ofile}
 	ncatted -O -a standard_name,Q,o,c,"specific_humidity" ${ofile}
@@ -98,8 +101,9 @@ prepro_ml () {
 workdir=/home/mss/mss_data
 
 # Setting up datasets that will be used in the preprocessing. Only the last 3 datasets will be processed and are available to MSS
-ecmwf_inits=(${workdir}/ecmwf_input/*)
+ecmwf_inits=(/data/mss/mss_data/ecmwf_input/*/)
 ecmwf_inits_list=(${ecmwf_inits[-1]} ${ecmwf_inits[-2]}  ${ecmwf_inits[-3]})
+#echo ${ecmwf_inits_list[@]}
 
 # Directory for output
 outdir=${workdir}/mss_prepro
